@@ -1,10 +1,8 @@
-from typing import List
-
 from ..models.iplist import IPList
 from suds import Client
 
 
-def parse_ip_lists(ip_lists) -> List[IPList]:
+def parse_ip_lists(ip_lists):
     """
     Used to turn a list if IPListTransport objects received by DSM into IPList objects
 

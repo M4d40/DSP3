@@ -5,7 +5,6 @@ Created on Nov 3 2016
 import json
 from datetime import datetime
 import time
-from typing import List, Dict
 
 from suds import Client
 import requests
@@ -53,7 +52,7 @@ class Manager:
         else:
             self.session_id = self.__authenticate()
 
-    def __authenticate(self) -> str:
+    def __authenticate(self):
         return self.client.service.authenticate(username=self._username, password=self._password)
 
     def authenticate_via_rest(self):
@@ -68,7 +67,7 @@ class Manager:
     def _authenticate_tenant(self):
         return self.client.service.authenticateTenant(tenantName=self._tenant, username=self._username, password=self._password)
 
-    def get_api_version(self) -> int:
+    def get_api_version(self):
         """
         Retrieves the api version of Trend Micro's Deep Security SOAP Web Service.
 
@@ -76,7 +75,7 @@ class Manager:
         """
         return self.client.service.getApiVersion()
 
-    def get_port_lists_all(self) -> List[PortList]:
+    def get_port_lists_all(self):
         """
         Retrieves a list of all reusable post lists.
 
@@ -85,11 +84,11 @@ class Manager:
         port_lists = self.client.service.portListRetrieveAll(sID=self.session_id)
         return pl_utils.parse_port_lists(port_lists)
 
-    def get_ip_lists_all(self) -> List[IPList]:
+    def get_ip_lists_all(self):
         ip_lists =  self.client.service.IPListRetrieveAll(sID=self.session_id)
         return ipl_utils.parse_ip_lists(ip_lists)
 
-    def save_ip_list(self, ip_list: IPList) -> str:
+    def save_ip_list(self, ip_list):
         iplto = ipl_utils.convert_to_tansport_ip_list(ip_list, self.client) #return IPListTransport object
         new_iplto = self.client.service.IPListSave(ipl=iplto, sID=self.session_id)
         if new_iplto:
@@ -124,7 +123,7 @@ class Manager:
         """
         return CloudAcctUtils(self.config).get_cloudAccount(id, self.session_id, self.verify_ssl)
 
-    def cloudaccout_testconnection(self, id: str) -> Dict[str, str]:
+    def cloudaccout_testconnection(self, id: str):
         """
 
         :param id:
@@ -132,7 +131,7 @@ class Manager:
         """
         return CloudAcctUtils(self.config).test_connection(id, self.session_id, self.verify_ssl)
 
-    def cloudaccout_syncronize(self, id: str) -> Dict[str, str]:
+    def cloudaccout_syncronize(self, id: str):
         """
 
         :param id:
@@ -140,7 +139,7 @@ class Manager:
         """
         return CloudAcctUtils(self.config).syncronize_account(id, self.session_id, self.verify_ssl)
 
-    def get_jvmusage(self, manager_node_id:str = "", from_date: datetime = None, to_date: datetime = None) -> Dict[str, str]:
+    def get_jvmusage(self, manager_node_id = "", from_date: datetime = None, to_date: datetime = None):
         """
         :param manager_node_id: ID of the manager node to retrieve usage info for. If not set, usage info for all manager nodes is retrieved.
         :param from_date: The date from which to list the usage statistics. If not set, then a time of one hour ago is used.
@@ -149,6 +148,13 @@ class Manager:
         """
         return UsageUtils(self.config).jvm_usage(self.session_id, manager_node_id, from_date, to_date, self.verify_ssl)
 
+
+    def host_detail_retrieve(self, host_group_id=None, host_id=None, security_profile_id=None, host_type=None, host_detail_level='HIGH'):
+        host_filter = HostFilter(self.client, hostGroupId=host_group_id, host_id=host_id, securityProfileId=security_profile_id, type=host_type).get_transport()
+        response = self.client.service.hostDetailRetrieve(host_filter, host_detail_level, sID=self.session_id)
+        if isinstance(response, list) and len(response) == 1:
+            return response[0]
+        return response
 
     def get_host_by_name(self, name:str):
         """
@@ -159,7 +165,7 @@ class Manager:
         response = self.client.service.hostRetrieveByName(name, sID=self.session_id)
         return HostUtils(self.config).create_host(response)
 
-    def host_status(self, id:str):
+    def host_status(self, id):
         """
         :param id: DS host id as string
         :return: suds.sudsobject.HostStatusTransport
@@ -167,7 +173,7 @@ class Manager:
         return self.client.service.hostGetStatus(int(id), self.session_id)
 
 
-    def host_agent_deactivate(self, ids:List[int]) -> None:
+    def host_agent_deactivate(self, ids):
         """
 
         :param ids:
@@ -175,7 +181,7 @@ class Manager:
         """
         self.client.service.hostAgentDeactivate(ids, self.session_id)
 
-    def host_agent_activate(self, ids:List[int]) -> None:
+    def host_agent_activate(self, ids):
         """
 
         :param ids:
@@ -183,7 +189,7 @@ class Manager:
         """
         self.client.service.hostAgentActivate(ids, self.session_id)
 
-    def host_components(self, host_id:str):
+    def host_components(self, host_id):
         """
 
         :param host_id:
@@ -192,7 +198,7 @@ class Manager:
         return HostUtils(self.config).components(host_id, self.session_id)
 
 
-    def host_update_now(self, ids:List[int]) -> None:
+    def host_update_now(self, ids):
         """
 
         :param ids:
@@ -200,7 +206,7 @@ class Manager:
         """
         self.client.service.hostUpdateNow(ids, self.session_id)
 
-    def host_getevents_now(self, ids:List[int]) -> None:
+    def host_getevents_now(self, ids):
         """
 
         :param ids:
@@ -208,7 +214,7 @@ class Manager:
         """
         self.client.service.hostGetEventsNow(ids, self.session_id)
 
-    def host_getevents_nowsync(self, id:str) -> None:
+    def host_getevents_nowsync(self, id:str):
         """
 
         :param id:
@@ -264,7 +270,7 @@ class Manager:
 
 
 
-    def host_integrity_scan(self, ids:List[int]) -> None:
+    def host_integrity_scan(self, ids):
         """
 
         :param ids:
@@ -293,7 +299,7 @@ class Manager:
         return self.client.service.hostRetrieveByHostGroup(id, self.session_id)
 
 
-    def host_recommendation_scan(self, ids:List[int]):
+    def host_recommendation_scan(self, ids):
         """
         This function runs a recomendation scan on an individual or list of hosts by id.
 
@@ -355,7 +361,6 @@ class Manager:
             response = self.client.service.antiMalwareEventRetrieve(timeFilter=tft, hostFilter=hft, eventIdFilter=idft, sID=self.session_id)
         except Exception as e:
             fault = e['fault']
-
         return response
 
 
@@ -417,7 +422,7 @@ class Manager:
 
         return response
 
-    def set_trusted_update_mode(self, host_id: int, duration:int = 0, enabled: bool = True) -> str:
+    def set_trusted_update_mode(self, host_id: int, duration:int = 0, enabled: bool = True):
         """
         This function sets the trusted (maintenance) mode status of the host specified for a specific duration.
         NOTE: This call only supported in DS10 and higher
@@ -434,7 +439,7 @@ class Manager:
         r = requests.post(url, data=modify_trusted_updatemode_request.to_json(), verify=self.verify_ssl, cookies=cookies, headers=headers)
         return json.dumps(dict(status_code=r.status_code))
 
-    def get_trusted_update_mode(self, host_id: int) -> str:
+    def get_trusted_update_mode(self, host_id: int):
         """
         This function retreives the trusted (maintenance) mode status of the host specified.
         NOTE: This call only supported in DS10 and higher
@@ -464,17 +469,17 @@ class Manager:
         return json.dumps(dict(DescribeTrustedUpdateModeResponse=dict(startTime=start_time, endTime=end_time, state=state, \
                                                                       endTimeHuman=human_end_time, startTimeHuman=human_start_time )))
 
-    def decision_logs(self) -> Dict[str, str]:
+    def decision_logs(self):
         url = "https://{}:{}/rest/decision-logs".format(self.host, self.port)
         r = requests.get(url=url, verify=self.verify_ssl, cookies=dict(sID=self.session_id), headers=self.headers)
         return json.loads(r.content.decode('utf-8'))
 
-    def decision_log(self, decision_log_id:int) -> Dict[str, str]:
+    def decision_log(self, decision_log_id:int):
         url = "https://{}:{}/rest/decision-logs/{}".format(self.host, self.port, decision_log_id)
         r = requests.get(url=url, verify=self.verify_ssl, cookies=dict(sID=self.session_id), headers=self.headers)
         return json.loads(r.content.decode('utf-8'))
 
-    def decision_log_details(self, decision_log_id:int, start_id:int = 1, count:int = 1) -> Dict[str, str]:
+    def decision_log_details(self, decision_log_id:int, start_id:int = 1, count:int = 1):
         params = {'startID': start_id, 'count': count}
         url = "https://{}:{}/rest/decision-logs/{}/details".format(self.host, self.port, decision_log_id)
         r = requests.get(url=url, verify=self.verify_ssl, cookies=dict(sID=self.session_id), headers=self.headers, params=params)
@@ -482,7 +487,7 @@ class Manager:
 
 
 
-    def appcontrol_events(self, event_time: datetime = None, event_time_op:str = None, max_items: int = None) -> Dict[str, str]:
+    def appcontrol_events(self, event_time: datetime = None, event_time_op:str = None, max_items: int = None):
         """
         TODO: IMplement eventID and eventIDOp parameters
         NOTE: This call only supported in DS10 and higher
@@ -501,7 +506,7 @@ class Manager:
         return json.loads(r.content.decode('utf-8'))
 
 
-    def appcontrol_event(self, event_id:int) -> Dict[str, str]:
+    def appcontrol_event(self, event_id:int):
         """
         Get the Application Control event with the specified event ID.
 
@@ -522,14 +527,14 @@ class Manager:
         return json.loads(r.content.decode('utf-8'))
 
 
-    def end_session(self) -> None:
+    def end_session(self):
         """
 
         :return:
         """
         self.client.service.endSession(sID=self.session_id)
 
-    def _convert_date(self, date:datetime) -> float:
+    def _convert_date(self, date:datetime):
         epoch = datetime.utcfromtimestamp(0)
         timestamp = (date - epoch).total_seconds() * 1000
         return int(timestamp)

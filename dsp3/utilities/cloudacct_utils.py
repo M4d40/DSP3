@@ -1,6 +1,3 @@
-from typing import Dict
-
-
 from ..config import Config
 import requests
 
@@ -29,7 +26,7 @@ class CloudAcctUtils:
         return response.json()
 
 
-    def test_connection(self, id:str, sessionID:str, verify_ssl:bool = False) -> Dict[str, str]:
+    def test_connection(self, id:str, sessionID:str, verify_ssl:bool = False):
         params = {'sID': sessionID }
         url = self.api_url + "/" + id + "/testconnection"
         print(url)
@@ -38,7 +35,7 @@ class CloudAcctUtils:
         return response.json()
 
 
-    def syncronize_account(self, id:str, sessionID:str, verify_ssl:bool = False) -> Dict[str, str]:
+    def syncronize_account(self, id:str, sessionID:str, verify_ssl:bool = False):
         params = {'sID': sessionID }
         url = self.api_url + "/" + id + "/synchronize"
         response = requests.put(url, verify=verify_ssl, headers=self.headers, params=params)
